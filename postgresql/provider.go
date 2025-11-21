@@ -205,7 +205,7 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     defaultLockGrants,
-				Description: "Wrap GRANT/REVOKEs in a lock to avoid executing them in parallel.",
+				Description: "Acquire advisory locks during GRANT/REVOKE operations to prevent 'tuple concurrently updated' errors. Locks are acquired at object level (table, schema, etc.) for optimal concurrency.",
 			},
 		},
 
