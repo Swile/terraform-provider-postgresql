@@ -632,6 +632,10 @@ func generateGrantLockID(database, objectType, schema, objectName string) string
 }
 
 func pgLockGrantTarget(txn *sql.Tx, d *schema.ResourceData) error {
+	if _, err := txn.Exec("SET statement_timeout = 0"); err != nil {
+		return fmt.Errorf("could not disable statement_timeout: %w", err)
+	}
+
 	database := d.Get("database").(string)
 	objectType := d.Get("object_type").(string)
 	schemaName := d.Get("schema").(string)
