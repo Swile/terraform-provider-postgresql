@@ -1,6 +1,18 @@
 Terraform Provider for PostgreSQL
 =================================
 
+Fork of Terraform PostgreSQL provider : https://github.com/cyrilgdn/terraform-provider-postgresql
+
+This intent of this fork is to maintain a working version of the provider while waiting for the original repository to be updated.
+
+This repository aims to be up to date with the original one, and also to add some features that are needed for our use cases.
+We re-integrated the following PRs that were open on the original repository:
+
+- [Use object-level locks for concurrent grants to improve parallelism](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/595)
+- [Support role configuration parameters](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/305)
+
+---
+
 This provider allows to manage with Terraform [Postgresql](https://www.postgresql.org/) objects like databases, extensions, roles, etc.
 
 It's published on the [Terraform registry](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs).
@@ -36,6 +48,27 @@ Using the provider
 
 Usage examples can be found in the Terraform [provider documentation](https://www.terraform.io/docs/providers/postgresql/index.html)
 
+Network Mirror
+----------------------
+
+This repository publishes a [Terraform provider network mirror](docs/NETWORK_MIRROR.md) on GitHub Pages, allowing you to use this provider without relying on external registries.
+
+**Quick setup:**
+
+Add to your `~/.terraformrc`:
+
+```hcl
+provider_installation {
+  network_mirror {
+    url = "https://swile.github.io/terraform-provider-postgresql/"
+    include = ["registry.terraform.io/cyrilgdn/postgresql"]
+  }
+}
+```
+
+See the [Network Mirror documentation](docs/NETWORK_MIRROR.md) for more details.
+
+
 Developing the Provider
 ---------------------------
 
@@ -58,7 +91,7 @@ $ make test
 
 In order to run the full suite of Acceptance tests, run `make testacc`.
 
-*Note:* 
+*Note:*
 - Acceptance tests create real resources, and often cost money to run.
 
 ```sh
@@ -68,7 +101,7 @@ $ make testacc
 In order to manually run some Acceptance test locally, run the following commands:
 ```sh
 # spins up a local docker postgres container
-make testacc_setup 
+make testacc_setup
 
 # Load the needed environment variables for the tests
 source tests/switch_superuser.sh
@@ -77,5 +110,5 @@ source tests/switch_superuser.sh
 TF_LOG=INFO go test -v ./postgresql -run ^TestAccPostgresqlRole_Basic$
 
 # cleans the env and tears down the postgres container
-make testacc_cleanup 
+make testacc_cleanup
 ```
