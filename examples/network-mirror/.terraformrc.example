@@ -1,0 +1,23 @@
+# Terraform CLI Configuration for Network Mirror
+#
+# Copy this file to one of the following locations:
+# - Linux/macOS: ~/.terraformrc
+# - Windows: %APPDATA%\terraform.rc
+#
+# This configuration tells Terraform to use the network mirror
+# hosted on GitHub Pages instead of the default registry.
+
+provider_installation {
+  network_mirror {
+    url = "https://swile.github.io/terraform-provider-postgresql/providers.tf.swile.co/"
+
+    # Optional: Include patterns to specify which providers should use this mirror
+    # include = ["swile/*"]
+  }
+
+  # Optional: Fallback to direct installation from registry if mirror fails
+  # direct {
+  #   exclude = ["swile/*"]
+  # }
+}
+
