@@ -1,0 +1,10 @@
+./*.tfstate
+.terraform/
+.terraform.lock.hcl*
+*.log
+.*.swp
+tests/docker-compose.*.yml
+terraform-provider-postgresql
+
+# Network mirror artifacts (deployed to gh-pages)
+mirror/
