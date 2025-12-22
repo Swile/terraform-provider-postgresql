@@ -8,7 +8,7 @@ This intent of this fork is to maintain a working version of the provider while 
 This repository aims to be up to date with the original one, and also to add some features that are needed for our use cases.
 We re-integrated the following PRs that were open on the original repository:
 
-- [Use object-level locks for concurrent grants to improve parallelism](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/595)
+- [Use object-level locks for concurrent grants to improve parallelism](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/595) ✅
 - [Support role configuration parameters](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/305)
 
 ---
