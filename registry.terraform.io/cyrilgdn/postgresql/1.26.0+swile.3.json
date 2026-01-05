@@ -1,0 +1,52 @@
+{
+  "archives": {
+    "darwin_amd64": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_darwin_amd64.zip",
+      "shasum": "26137fcc8b7ee1a2c19ec98d57d29ff9fb51068837d9e940516143dc62a9a26c"
+    },
+    "darwin_arm64": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_darwin_arm64.zip",
+      "shasum": "00b6b81130a5939c27e51fbafeb436148c75db72255bafa06e1a90332dc354d3"
+    },
+    "freebsd_386": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_freebsd_386.zip",
+      "shasum": "bebd29c920ab38eb33cdcfb7c9b12c285c93b16e4c6fed9c2a825e1cef1054f0"
+    },
+    "freebsd_amd64": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_freebsd_amd64.zip",
+      "shasum": "dda89e8ad5f7009d37b1e7f65118ce42e1d4f0f1efe9aea72570bc834e7a3806"
+    },
+    "freebsd_arm": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_freebsd_arm.zip",
+      "shasum": "09efd5961262731efd94d5577eea978f6443e5baabb9c58bb894fd117800a116"
+    },
+    "freebsd_arm64": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_freebsd_arm64.zip",
+      "shasum": "eb1f74653e80e4052af40994e0d4cd80c33d8112ea5fcf69b844629e3efbf5b1"
+    },
+    "linux_386": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_linux_386.zip",
+      "shasum": "b52d7ecea3828078a12addc951819cc774f06e02d5284b01fc05da991ebc2a29"
+    },
+    "linux_amd64": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_linux_amd64.zip",
+      "shasum": "40be64fba1adc8508c47a3f69c36f7f3bd9dc4fbc74c0f14f0c5fd1f96207eb3"
+    },
+    "linux_arm": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_linux_arm.zip",
+      "shasum": "92c2ea917ea96ef49d9292e21acdbd88b3813910e6c43d7ca9d11d7b01115d0b"
+    },
+    "linux_arm64": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_linux_arm64.zip",
+      "shasum": "78111ae2900497e696a3944b34dd87cd3049014d0c4d215733616a5fd9f03213"
+    },
+    "windows_386": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_windows_386.zip",
+      "shasum": "543d8b1c26b2afe4853f524b43e31233763e08620d43aa86fc990305bae27d0b"
+    },
+    "windows_amd64": {
+      "url": "https://swile.github.io/terraform-provider-postgresql/registry.terraform.io/cyrilgdn/postgresql/1.26.0+swile.3/terraform-provider-postgresql_1.26.0+swile.3_windows_amd64.zip",
+      "shasum": "58cc94e9a4a56c1dd1daa6725b2bfab98200e8024cc30ac9aec965e5e5beed9c"
+    }
+  }
+}
