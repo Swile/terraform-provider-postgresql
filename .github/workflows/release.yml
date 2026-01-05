@@ -96,6 +96,9 @@ jobs:
 
           # Download release assets
           gh release download "v${VERSION}" -D "${MIRROR_VERSION_DIR}"
+          
+          # Grab existing gh-pages index
+          cp -f ./gh-pages/${{env.REGISTRY}}/${{env.NAMESPACE}}/${{env.PROVIDER_NAME}}/index.json ${{env.MIRROR_DIR}}/${{env.REGISTRY}}/${{env.NAMESPACE}}/${{env.PROVIDER_NAME}}/index.json
 
       - name: Generate network mirror metadata
         run: |
