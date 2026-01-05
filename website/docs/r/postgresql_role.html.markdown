@@ -52,6 +52,18 @@ resource "postgresql_role" "secure_role" {
   password_wo         = "secure_password_123"
   password_wo_version = "1"
 }
+
+# Example with custom parameters
+resource "postgresql_role" "my_audited_role" {
+  name     = "audited_role"
+  login    = true
+  password = "mypas"
+
+  parameter {
+    name  = "pgaudit.log"
+    value = "all"
+  }
+}
 ```
 
 ## Write-Only Password Management
@@ -166,9 +178,28 @@ resource "postgresql_role" "app_user" {
   an implicit
   [`DROP OWNED`](https://www.postgresql.org/docs/current/static/sql-drop-owned.html)).
 
-* `statement_timeout` - (Optional) Defines [`statement_timeout`](https://www.postgresql.org/docs/current/runtime-config-client.html#RUNTIME-CONFIG-CLIENT-STATEMENT) setting for this role which allows to abort any statement that takes more than the specified amount of time.
+* `statement_timeout` - (Optional)
+  Defines [`statement_timeout`](https://www.postgresql.org/docs/current/runtime-config-client.html#RUNTIME-CONFIG-CLIENT-STATEMENT)
+  setting for this role which allows to abort any statement that takes more than the specified amount of time.
 
-* `assume_role` - (Optional) Defines the role to switch to at login via [`SET ROLE`](https://www.postgresql.org/docs/current/sql-set-role.html).
+* `assume_role` - (Optional) Defines the role to switch to at login
+  via [`SET ROLE`](https://www.postgresql.org/docs/current/sql-set-role.html).
+
+* `parameter` - (Optional) A list of configuration parameter objects. Their keys are documented below.
+
+### parameter Argument Reference
+
+~> **NOTE:** Configuration parameters that can be defined as explicit arguments
+cannot be declared using `parameter`. You must use the `search_path`, `statement_timeout`,
+`idle_in_transaction_session_timeout`, and `assume_role` arguments to set those
+configuration parameters.
+
+* `name` - (Required) Name of a configuration parameter.
+
+* `value` - (Required) Value to set for the configuration parameter.
+
+* `quote` - (Optional) Quote the value of the parameter as a literal.
+  Defaults value is `true`.
 
 ## Import Example
 
