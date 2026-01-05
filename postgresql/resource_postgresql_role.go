@@ -587,7 +587,9 @@ func resourcePostgreSQLRoleReadImpl(db *DBConnection, d *schema.ResourceData) er
 		d.Set(rolePasswordAttr, password)
 	}
 
-	d.Set(roleParameterAttr, readRoleParameters(roleConfig, d.Get(roleParameterAttr).(*schema.Set)))
+	if _, ok := d.GetOk(roleParameterAttr); ok {
+		d.Set(roleParameterAttr, readRoleParameters(roleConfig, d.Get(roleParameterAttr).(*schema.Set)))
+	}
 
 	return nil
 }
@@ -660,7 +662,7 @@ func readRoleParameters(roleConfig pq.ByteaArray, existingParams *schema.Set) *s
 	params := make([]interface{}, 0)
 	for _, v := range roleConfig {
 		tokens := strings.Split(string(v), "=")
-		if !sliceContainsStr(ignoredRoleConfigurationParameters, tokens[0]) {
+		if len(tokens) == 2 && !sliceContainsStr(ignoredRoleConfigurationParameters, tokens[0]) {
 			quote := true
 			for _, p := range existingParams.List() {
 				existingParam := p.(map[string]interface{})
