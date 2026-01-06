@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/lib/pq"
 )
 
 func TestAccPostgresqlDatabase_Basic(t *testing.T) {
@@ -629,24 +631,42 @@ func testAccCheckDatabaseParameter(resourceName, paramName, expectedValue string
 			return fmt.Errorf("could not connect to database: %v", err)
 		}
 
-		var datconfig []string
-		err = db.QueryRow("SELECT datconfig FROM pg_database WHERE datname = $1", dbName).Scan(&datconfig)
-		if err != nil {
+		var setconfig pq.StringArray
+		err = db.QueryRow(`
+			SELECT s.setconfig 
+			FROM pg_database d
+			LEFT JOIN pg_db_role_setting s ON s.setdatabase = d.oid AND s.setrole = 0
+			WHERE d.datname = $1
+		`, dbName).Scan(&setconfig)
+		if err != nil && err != sql.ErrNoRows {
 			return fmt.Errorf("error reading database configuration: %v", err)
 		}
 
 		// Check if the parameter is set with the expected value
 		expectedConfig := fmt.Sprintf("%s=%s", paramName, expectedValue)
 		found := false
-		for _, config := range datconfig {
-			if config == expectedConfig {
+		for _, config := range setconfig {
+			// Remove surrounding quotes if present (for quoted values)
+			cleanConfig := config
+			if len(config) > 0 && strings.Contains(config, "=") {
+				parts := strings.SplitN(config, "=", 2)
+				if len(parts) == 2 {
+					value := parts[1]
+					// Remove surrounding quotes
+					if len(value) >= 2 && value[0] == '"' && value[len(value)-1] == '"' {
+						value = value[1 : len(value)-1]
+					}
+					cleanConfig = parts[0] + "=" + value
+				}
+			}
+			if cleanConfig == expectedConfig {
 				found = true
 				break
 			}
 		}
 
 		if !found {
-			return fmt.Errorf("parameter %s not found with value %s in database configuration", paramName, expectedValue)
+			return fmt.Errorf("parameter %s not found with value %s in database configuration (found: %v)", paramName, expectedValue, setconfig)
 		}
 
 		return nil
