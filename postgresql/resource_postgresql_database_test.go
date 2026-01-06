@@ -556,3 +556,99 @@ resource "postgresql_database" "mydb_default_owner" {
 }
 
 `
+
+func TestAccPostgresqlDatabase_Parameters(t *testing.T) {
+	skipIfNotAcc(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPostgresqlDatabaseDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: `
+resource "postgresql_database" "test_params_db" {
+	name = "test_params_db"
+	
+	parameter {
+		name  = "work_mem"
+		value = "16MB"
+	}
+	
+	parameter {
+		name  = "max_parallel_workers"
+		value = "4"
+		quote = false
+	}
+}
+`,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPostgresqlDatabaseExists("postgresql_database.test_params_db"),
+					resource.TestCheckResourceAttr("postgresql_database.test_params_db", "name", "test_params_db"),
+					resource.TestCheckResourceAttr("postgresql_database.test_params_db", "parameter.#", "2"),
+					testAccCheckDatabaseParameter("postgresql_database.test_params_db", "work_mem", "16MB"),
+					testAccCheckDatabaseParameter("postgresql_database.test_params_db", "max_parallel_workers", "4"),
+				),
+			},
+			{
+				Config: `
+resource "postgresql_database" "test_params_db" {
+	name = "test_params_db"
+	
+	parameter {
+		name  = "work_mem"
+		value = "32MB"
+	}
+}
+`,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPostgresqlDatabaseExists("postgresql_database.test_params_db"),
+					resource.TestCheckResourceAttr("postgresql_database.test_params_db", "parameter.#", "1"),
+					testAccCheckDatabaseParameter("postgresql_database.test_params_db", "work_mem", "32MB"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckDatabaseParameter(resourceName, paramName, expectedValue string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+
+		dbName := rs.Primary.Attributes["name"]
+		if dbName == "" {
+			return fmt.Errorf("no database name set")
+		}
+
+		client := testAccProvider.Meta().(*Client)
+		db, err := client.Connect()
+		if err != nil {
+			return fmt.Errorf("could not connect to database: %v", err)
+		}
+
+		var datconfig []string
+		err = db.QueryRow("SELECT datconfig FROM pg_database WHERE datname = $1", dbName).Scan(&datconfig)
+		if err != nil {
+			return fmt.Errorf("error reading database configuration: %v", err)
+		}
+
+		// Check if the parameter is set with the expected value
+		expectedConfig := fmt.Sprintf("%s=%s", paramName, expectedValue)
+		found := false
+		for _, config := range datconfig {
+			if config == expectedConfig {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return fmt.Errorf("parameter %s not found with value %s in database configuration", paramName, expectedValue)
+		}
+
+		return nil
+	}
+}
