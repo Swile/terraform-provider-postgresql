@@ -10,6 +10,8 @@ We re-integrated the following PRs that were open on the original repository:
 
 - [Use object-level locks for concurrent grants to improve parallelism](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/595) ✅
 - [Support role configuration parameters](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/305) ✅
+- [Allow configuring maximum idle connections](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/608) ✅
+- [Add configuration parameters support for postgresql_database resource](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/607) ✅
 
 ---
 
