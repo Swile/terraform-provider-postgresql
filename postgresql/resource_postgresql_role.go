@@ -32,6 +32,7 @@ const (
 	roleReplicationAttr                     = "replication"
 	roleSkipDropRoleAttr                    = "skip_drop_role"
 	roleSkipReassignOwnedAttr               = "skip_reassign_owned"
+	roleReassignOwnedToAttr                 = "reassign_owned_to"
 	roleSuperuserAttr                       = "superuser"
 	roleValidUntilAttr                      = "valid_until"
 	roleRolesAttr                           = "roles"
@@ -193,6 +194,11 @@ func resourcePostgreSQLRole() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 				Description: "Skip actually running the REASSIGN OWNED command when removing a role from PostgreSQL",
+			},
+			roleReassignOwnedToAttr: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Role to reassign owned objects to when removing a role from PostgreSQL. If not specified, defaults to the current user",
 			},
 			roleStatementTimeoutAttr: {
 				Type:         schema.TypeInt,
@@ -440,9 +446,13 @@ func resourcePostgreSQLRoleDelete(db *DBConnection, d *schema.ResourceData) erro
 
 	if !d.Get(roleSkipReassignOwnedAttr).(bool) {
 		if err := withRolesGranted(txn, []string{roleName}, func() error {
-			currentUser := db.client.config.getDatabaseUsername()
-			if _, err := txn.Exec(fmt.Sprintf("REASSIGN OWNED BY %s TO %s", pq.QuoteIdentifier(roleName), pq.QuoteIdentifier(currentUser))); err != nil {
-				return fmt.Errorf("could not reassign owned by role %s to %s: %w", roleName, currentUser, err)
+			// Use the specified reassign_owned_to user, or fall back to current user
+			reassignTo := d.Get(roleReassignOwnedToAttr).(string)
+			if reassignTo == "" {
+				reassignTo = db.client.config.getDatabaseUsername()
+			}
+			if _, err := txn.Exec(fmt.Sprintf("REASSIGN OWNED BY %s TO %s", pq.QuoteIdentifier(roleName), pq.QuoteIdentifier(reassignTo))); err != nil {
+				return fmt.Errorf("could not reassign owned by role %s to %s: %w", roleName, reassignTo, err)
 			}
 
 			if _, err := txn.Exec(fmt.Sprintf("DROP OWNED BY %s", pq.QuoteIdentifier(roleName))); err != nil {
@@ -555,6 +565,7 @@ func resourcePostgreSQLRoleReadImpl(db *DBConnection, d *schema.ResourceData) er
 	d.Set(roleLoginAttr, roleCanLogin)
 	d.Set(roleSkipDropRoleAttr, d.Get(roleSkipDropRoleAttr).(bool))
 	d.Set(roleSkipReassignOwnedAttr, d.Get(roleSkipReassignOwnedAttr).(bool))
+	d.Set(roleReassignOwnedToAttr, d.Get(roleReassignOwnedToAttr).(string))
 	d.Set(roleSuperuserAttr, roleSuperuser)
 	d.Set(roleValidUntilAttr, roleValidUntil)
 	d.Set(roleReplicationAttr, roleReplication)
