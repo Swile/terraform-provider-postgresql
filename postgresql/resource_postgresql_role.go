@@ -399,24 +399,51 @@ func resourcePostgreSQLRoleDelete(db *DBConnection, d *schema.ResourceData) erro
 	}
 
 	if !d.Get(roleSkipReassignOwnedAttr).(bool) {
-		if err := withRolesGranted(txn, []string{roleName}, func() error {
-			// Use the specified reassign_owned_to user, or fall back to current user
-			reassignTo := d.Get(roleReassignOwnedToAttr).(string)
-			if reassignTo == "" {
-				reassignTo = db.client.config.getDatabaseUsername()
-			}
-			if _, err := txn.Exec(fmt.Sprintf("REASSIGN OWNED BY %s TO %s", pq.QuoteIdentifier(roleName), pq.QuoteIdentifier(reassignTo))); err != nil {
-				return fmt.Errorf("could not reassign owned by role %s to %s: %w", roleName, reassignTo, err)
+		// Use the specified reassign_owned_to user, or fall back to current user
+		reassignTo := d.Get(roleReassignOwnedToAttr).(string)
+		if reassignTo == "" {
+			reassignTo = db.client.config.getDatabaseUsername()
+		}
+
+		// Get list of all databases to run REASSIGN OWNED in each one
+		databases, err := listDatabases(txn)
+		if err != nil {
+			return fmt.Errorf("error committing initial transaction: %w", err)
+		}
+
+		// Execute REASSIGN OWNED and DROP OWNED in each database
+		for _, dbName := range databases {
+			log.Printf("[DEBUG] Running REASSIGN OWNED in database %s", dbName)
+
+			dbTxn, err := startTransaction(db.client, dbName)
+			if err != nil {
+				return fmt.Errorf("could not start transaction in database %s: %w", dbName, err)
 			}
 
-			if _, err := txn.Exec(fmt.Sprintf("DROP OWNED BY %s", pq.QuoteIdentifier(roleName))); err != nil {
-				return fmt.Errorf("could not drop owned by role %s: %w", roleName, err)
+			if err := withRolesGranted(dbTxn, []string{roleName, reassignTo}, func() error {
+				log.Printf("reassignOwned: reassign owned by role %s to %s in database %s", roleName, reassignTo, dbName)
+
+				if _, err := dbTxn.Exec(fmt.Sprintf("REASSIGN OWNED BY %s TO %s", pq.QuoteIdentifier(roleName), pq.QuoteIdentifier(reassignTo))); err != nil {
+					return fmt.Errorf("could not reassign owned by role %s to %s in database %s: %w", roleName, reassignTo, dbName, err)
+				}
+
+				if _, err := dbTxn.Exec(fmt.Sprintf("DROP OWNED BY %s", pq.QuoteIdentifier(roleName))); err != nil {
+					return fmt.Errorf("could not drop owned by role %s in database %s: %w", roleName, dbName, err)
+				}
+				return nil
+			}); err != nil {
+				if rollbackErr := dbTxn.Rollback(); rollbackErr != nil {
+					log.Printf("[WARN] could not rollback transaction in database %s: %v", dbName, rollbackErr)
+				}
+				return err
 			}
-			return nil
-		}); err != nil {
-			return err
+
+			if err := dbTxn.Commit(); err != nil {
+				return fmt.Errorf("error committing transaction in database %s: %w", dbName, err)
+			}
 		}
 	}
+
 	if !d.Get(roleSkipDropRoleAttr).(bool) {
 		if _, err := txn.Exec(fmt.Sprintf("DROP ROLE %s", pq.QuoteIdentifier(roleName))); err != nil {
 			return fmt.Errorf("could not delete role %s: %w", roleName, err)
@@ -424,7 +451,7 @@ func resourcePostgreSQLRoleDelete(db *DBConnection, d *schema.ResourceData) erro
 	}
 
 	if err := txn.Commit(); err != nil {
-		return fmt.Errorf("error committing schema: %w", err)
+		return fmt.Errorf("error committing final transaction: %w", err)
 	}
 
 	d.SetId("")
