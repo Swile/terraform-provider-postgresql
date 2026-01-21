@@ -241,7 +241,7 @@ func withRolesGranted(txn *sql.Tx, roles []string, fn func() error) error {
 // listDatabases returns the list of all databases accessible for REASSIGN OWNED operations.
 // It excludes template databases and databases that don't allow connections.
 func listDatabases(db QueryAble) ([]string, error) {
-	rows, err := db.Query("SELECT datname FROM pg_database WHERE datallowconn = true AND NOT datistemplate")
+	rows, err := db.Query("SELECT datname FROM pg_database WHERE datallowconn = true AND NOT datistemplate AND has_database_privilege(current_user, datname, 'CONNECT')")
 	if err != nil {
 		return nil, fmt.Errorf("could not list databases: %w", err)
 	}
