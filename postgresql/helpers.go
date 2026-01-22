@@ -601,6 +601,19 @@ func pgLockRole(txn *sql.Tx, role string) error {
 	if _, err := txn.Exec("SET statement_timeout = 0"); err != nil {
 		return fmt.Errorf("could not disable statement_timeout: %w", err)
 	}
+
+	// Try to increase deadlock_timeout to avoid false positives in high-latency scenarios
+	// Use a savepoint to isolate potential errors on PostgreSQL < 15 or when user lacks permissions
+	// This prevents aborting the entire transaction if SET fails
+	_, _ = txn.Exec("SAVEPOINT deadlock_timeout_sp")
+	if _, err := txn.Exec("SET deadlock_timeout = '5s'"); err != nil {
+		// Rollback to savepoint to clear the error state
+		_, _ = txn.Exec("ROLLBACK TO SAVEPOINT deadlock_timeout_sp")
+		log.Printf("[WARN] could not set deadlock_timeout to 5s (continuing with default): %v", err)
+	}
+	// Release the savepoint whether it succeeded or not
+	_, _ = txn.Exec("RELEASE SAVEPOINT deadlock_timeout_sp")
+
 	if _, err := txn.Exec("SELECT pg_advisory_xact_lock(oid::bigint) FROM pg_roles WHERE rolname = $1", role); err != nil {
 		return fmt.Errorf("could not get advisory lock for role %s: %w", role, err)
 	}

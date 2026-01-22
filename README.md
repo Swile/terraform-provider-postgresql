@@ -13,6 +13,7 @@ We re-integrated the following PRs that were open on the original repository:
 - [Allow configuring maximum idle connections](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/608) ✅
 - [Add configuration parameters support for postgresql_database resource](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/607) ✅
 - [feat: add reassign_owned_to parameter to role ressource](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/613) ✅
+- Increase deadlock timeout to 5s ✅
 
 ---
 
