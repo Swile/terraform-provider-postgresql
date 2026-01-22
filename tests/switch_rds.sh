@@ -17,6 +17,13 @@ BEGIN;
 COMMIT;
 EOS
 
+# Grant SET privilege on deadlock_timeout (PostgreSQL 15+)
+# This will silently fail on older versions, which is acceptable since
+# on older versions the rds user would need to be a superuser anyway
+psql -d postgres > /dev/null 2>&1 <<EOS
+GRANT SET ON PARAMETER deadlock_timeout TO rds;
+EOS
+
 psql -d template1 > /dev/null <<EOS
 BEGIN;
     ALTER SCHEMA public OWNER TO rds;
