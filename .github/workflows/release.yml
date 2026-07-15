@@ -32,8 +32,8 @@ jobs:
       -
         name: Unshallow
         run: git fetch --prune --unshallow
-
-      - uses: actions/setup-go@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
         with:
           cache: true
           cache-dependency-path: 'go.sum'
@@ -41,7 +41,7 @@ jobs:
       # -
       #   name: Import GPG key
       #   id: import_gpg
-      #   uses: crazy-max/ghaction-import-gpg@v6.1.0
+      #   uses: crazy-max/ghaction-import-gpg@v7
       #   with:
       #     gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
       #     passphrase: ${{ secrets.PASSPHRASE }}
