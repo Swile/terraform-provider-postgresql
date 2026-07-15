@@ -6,6 +6,9 @@ Fork of Terraform PostgreSQL provider : https://github.com/cyrilgdn/terraform-pr
 This intent of this fork is to maintain a working version of the provider while waiting for the original repository to be updated.
 
 This repository aims to be up to date with the original one, and also to add some features that are needed for our use cases.
+
+This fork currently tracks upstream **v1.27.0**.
+
 We re-integrated the following PRs that were open on the original repository:
 
 - [Use object-level locks for concurrent grants to improve parallelism](https://github.com/cyrilgdn/terraform-provider-postgresql/pull/595) ✅
