@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pgversion: [16, 15, 14, 13, 12]
+        pgversion: [18, 17, 16, 15, 14, 13, 12]
 
     env:
       PGVERSION: ${{ matrix.pgversion }}
@@ -22,11 +22,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
         with:
           cache: true
           cache-dependency-path: 'go.sum'
           go-version-file: 'go.mod'
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.15.4'
+          terraform_wrapper: false
 
       - name: test
         run: make test
